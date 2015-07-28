@@ -1,4 +1,4 @@
-TalkDemo::Application.routes.draw do
+ANABAS4AEW::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
   resources :students do

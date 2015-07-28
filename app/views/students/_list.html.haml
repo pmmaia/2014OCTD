@@ -1,15 +1,15 @@
-- if student.remark == "PASS"
+- if student.remark == "California Hazardous"
   %tr.success
     %td
       = student.fname
     %td
       = student.lname
     %td
+      = student.grade
+    %td
       = student.marks
     %td
       = student.percentage
-    %td
-      = student.grade
     %td
       = student.remark
 - else
@@ -19,10 +19,10 @@
     %td
       = student.lname
     %td
+      = student.grade
+    %td
       = student.marks
     %td
       = student.percentage
-    %td
-      = student.grade
     %td
       = student.remark

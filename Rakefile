@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-TalkDemo::Application.load_tasks
+ANABAS4AEW::Application.load_tasks

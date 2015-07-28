@@ -2,19 +2,16 @@ namespace :generate do
   desc "Generating data"
   task :data => [:students, :update]
   task :students => :environment do 
-    40.times{ |i| Student.create!(fname: "I am too long please fit me inside_#{i}", lname: "I am also too long please get me inside_#{i}", marks: rand(100)) }
-    60.times{ |i| Student.create!(fname: "student_fname_#{i}", lname: "student_lname_#{i}", marks: rand(100)) }
+    100.times{ |i| Student.create!(fname: "Composite SS_#{i+1}", lname: "SS_#{i+1}-0.5", marks: rand(1500), grade: "Composite") }
   end
   task :update => :environment do
     students = Student.all
+    pb_ttlc = 1000
+    wetpb_stlc = 5
     students.each do |s|
-      g = (s.marks > 70) ? "A" : ((s.marks > 50 ) ? "B" : "C" )
-      r = (s.marks > 35) ? "PASS" : "FAIL"
-      if r == "FAIL"
-        s.update_attributes(percentage: s.marks, grade: "", remark: r)
-      else
-        s.update_attributes(percentage: s.marks, grade: g, remark: r)
-      end
+      p = rand(80)/10.0
+      r = ((s.marks > pb_ttlc) || p > wetpb_stlc) ? "California Hazardous" : "Non Hazardous" 
+      s.update_attributes(percentage: p, remark: r)
     end
   end
 end

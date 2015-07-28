@@ -1,7 +1,9 @@
 source 'https://rubygems.org'
+ruby '2.1.2'
 
-gem 'rails', '3.2.13'
-gem 'mongoid'
+gem 'rails', '4.0.4'
+# gem 'mongoid'
+gem 'sqlite3'
 gem 'haml-rails'
 gem 'axlsx'
 # Bundle edge Rails instead:
@@ -12,8 +14,8 @@ gem 'axlsx'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
+  gem 'sass-rails', '>=4.0.0'
+  gem 'coffee-rails', '>=4.0.0'
   gem 'twitter-bootstrap-rails'
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes

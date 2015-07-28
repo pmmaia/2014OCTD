@@ -5,35 +5,17 @@ class StudentsController < ApplicationController
   end
 
   def generate
-    %x[rake generate:data] if @students.empty?
+    %x[rake generate:data] 
   end
 
   def export
     case params[:type]
-    when "Basic"
-      exprot_basic_xlsx
-    when "Row&Col"
-      exprot_row_col_xlsx
-    when "Custom"
-      export_custom_xlsx
-    when "All apply"
+    when "Development"
       export_all_together_xlsx
-    when "Merge"
-      export_merge_xlsx
-    when "Image"
-      export_image_xlsx
-    when "Hyperlink"
-      export_hyperlink_xlsx
-    when "Bar Chart"
-      export_bar_chart_axlsx
-    when "Line Chart"
-      export_line_chart_axlsx
-    when "Pie Chart"
-      export_pie_chart_axlsx
     end
   end
 
-  def exprot_basic_xlsx
+  def export_basic_xlsx
     @wb.add_worksheet(name: "Basic") do |sheet|
       sheet.add_row get_header 
       @students.each do |st|
@@ -44,7 +26,7 @@ class StudentsController < ApplicationController
     send_file("#{Rails.root}/tmp/basic.xlsx", filename: "Basic.xlsx", type: "application/xlsx")
   end
 
-  def exprot_row_col_xlsx
+  def export_row_col_xlsx
     @wb.add_worksheet(name: "Row&Col") do |sheet|
       sheet.add_row get_header 
       @students.each do |st|
@@ -76,23 +58,28 @@ class StudentsController < ApplicationController
 
   def export_all_together_xlsx
     @wb.add_worksheet(name: "All") do |sheet|
+      sheet.add_row ["Draft Offsite Waste Disposal Classification Indicator", "", "", "", "", ""], style: @heading, height: 30
+      sheet.merge_cells("A1:F1")
       sheet.add_row get_header, style: @header
       @students.each do |st|
         if st.fname.length >= 21
-          if st.remark == "PASS"
-            sheet.add_row [st.fname, st.lname, st.marks, st.percentage, st.grade, st.remark], style: @style_pass, height: 25
+          if st.remark == "California Hazardous"
+            sheet.add_row [st.fname, st.lname, st.grade, st.marks, st.percentage, st.remark], style: @style_pass, height: 25
           else
-            sheet.add_row [st.fname, st.lname, st.marks, st.percentage, st.grade, st.remark], style: @style_fail, height: 25
+            sheet.add_row [st.fname, st.lname, st.grade, st.marks, st.percentage, st.remark], style: @style_fail, height: 25
           end
         else
-          if st.remark == "PASS"
-            sheet.add_row [st.fname, st.lname, st.marks, st.percentage, st.grade, st.remark], style: @style_pass
+          if st.remark == "California Hazardous"
+            sheet.add_row [st.fname, st.lname, st.grade, st.marks, st.percentage, st.remark], style: @style_pass
           else
-            sheet.add_row [st.fname, st.lname, st.marks, st.percentage, st.grade, st.remark], style: @style_fail
+            sheet.add_row [st.fname, st.lname, st.grade, st.marks, st.percentage, st.remark], style: @style_fail
           end
         end
       end
-      sheet.column_widths 20, 20, nil, nil, nil, nil
+        sheet.add_row ["", "", "Min", "=MIN(D3:D102)", "=MIN(E3:E102)", ""], style: @style_fail
+        sheet.add_row ["", "", "Max", "=MAX(D3:D102)", "=MAX(E3:E102)", ""], style: @style_fail
+        sheet.add_row ["", "", "Average", "=AVERAGE(D3:D102)", "", ""], style: @style_fail
+      sheet.column_widths 20, 20, nil, nil, nil, 20
     end
     @p.serialize("#{Rails.root}/tmp/all.xlsx")
     send_file("#{Rails.root}/tmp/all.xlsx", filename: "All.xlsx", type: "application/xlsx")
@@ -100,8 +87,8 @@ class StudentsController < ApplicationController
 
   def export_merge_xlsx 
     @wb.add_worksheet(name: "All") do |sheet|
-      sheet.add_row ["", "Student Result Detail", "", "", "", ""], style: @heading, height: 30
-      sheet.merge_cells("B1:D1")
+      sheet.add_row ["Student Result Detail", "", "", "", "", ""], style: @heading, height: 30
+      sheet.merge_cells("A1:F1")
       sheet.add_row get_header, style: @header
       @students_with_a = Student.where(grade: "A") 
       @students_with_b = Student.where(grade: "B") 
@@ -259,21 +246,25 @@ class StudentsController < ApplicationController
 
   def load_styles
     @wb.styles do |s| 
-      @heading = s.add_style alignment: {horizontal: :center}, b: true, sz: 18, bg_color: "0066CC", fg_color: "FF"
-      @header = s.add_style alignment: {horizontal: :center}, b: true, sz: 10, bg_color: "C0C0C0"
-      @data = s.add_style alignment: {wrap_text: true}
-      @center = s.add_style alignment: {horizontal: :center}, fg_color: "0000FF"
-      @green = s.add_style alignment: {horizontal: :left}, fg_color: "00FF00"
-      @red = s.add_style alignment: {horizontal: :left}, fg_color: "FF0000"
-      @style_pass = [@data, @data, @data, @data, @center, @green]
-      @style_fail = [@data, @data, @data, @data, @center, @red]
+      @item_style = s.add_style :b => false, :sz => 9,  :font_name => 'Century Gothic', :alignment => { :horizontal => :left, :vertical => :center, :wrap_text => true}
+      @heading = s.add_style alignment: {horizontal: :center}, b: true, sz: 18, bg_color: "0066CC", fg_color: "FF", :font_name => "Century Gothic"
+      @header = s.add_style alignment: {horizontal: :left}, b: true, sz: 10, bg_color: "4F628E", :font_name => "Comic Sans Ms"
+      @data_str_red= s.add_style alignment: {wrap_text: true}, bg_color: "D4C26A"
+      @data_str_green= s.add_style alignment: {wrap_text: true}, bg_color: "99A637"
+      @data_num_red= s.add_style alignment: {wrap_text: true}, b: true, i: true, alignment: { horizontal: :left, vertical: :center }, bg_color: "D4C26A"
+      @data_num_green= s.add_style alignment: {wrap_text: true}, b: true, i: true, alignment: { horizontal: :left, vertical: :center }, bg_color: "99A637"
+      @center = s.add_style alignment: {horizontal: :center}, fg_color: "0000FF" 
+      @green = s.add_style alignment: {horizontal: :left}, fg_color: "000000", bg_color: "99A637" 
+      @red = s.add_style alignment: {horizontal: :left}, fg_color: "FF0000", bg_color: "D4C26A", b: true
       @total = [@data, @header, @header, @header, @header, @header]
+      @style_pass = [@data_str_red, @data_str_red, @data_str_red, @data_num_red, @data_num_red, @red]
+      @style_fail = [@data_str_green, @data_str_green, @data_str_green, @data_num_green, @data_num_green, @green]
       @date_format = s.add_style :format_code => 'YYYY-MM-DD'
       @time_format = s.add_style :format_code => 'hh:mm:ss'
     end
   end
 
   def get_header
-    ["First Name", "Last Name", "Marks", "Percentage", "Grade", "Remark"]
+    ["Laboratory ID", "Sample ID", "Scheme", "Pb (mg/Kg)", "Wet Pb (mg/L)", "Classification"]
   end
 end
